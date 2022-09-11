@@ -1,0 +1,76 @@
+﻿
+@page "/detailsinhvien/{id:int}"
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager NavigationManager
+@inject ISinhVienService SinhVienService
+@attribute [Authorize]
+
+@if (sinhVien == null)
+{
+    <div class="spinner"></div>
+}
+
+<div class="row my-10">
+        <div class="col-lg-6 col-xl-4 offset-lg-3 offset-xl-4">
+            <RadzenCard class="m-6" >
+                <h3 class="h5">Thông tin sinh viên @sinhVien.TenSv</h3>
+                <div class="d-flex flex-row">
+                    <RadzenImage Path="@sinhVien.AnhSv" Class="rounded-circle float-left mr-3" Style="width: 100px; height: 100px;" />
+                    <div>
+                        <div>Tên sinh viên</div>
+                        <b>@(sinhVien.TenSv)</b>
+                        <div class="mt-3">Lớp</div>
+                        <b>@lop.TenLop</b>
+                    </div>
+                </div>
+            </RadzenCard>
+            <RadzenCard class="m-6">
+                <h3 class="h5">Thông tin cá nhân</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div>Địa chỉ</div>
+                        <b>@(sinhVien.DiaChi)</b>
+                        <div>Số điện thoại</div>
+                        <b>@(sinhVien.SDT)</b>
+                        
+                    </div>
+                    <div class="col-md-6">
+                        <div>Email</div>
+                        <b>@(sinhVien.Email)</b>
+                        <div>Ngày sinh</div>
+                        <b>@(sinhVien.NgaySinh)</b>  
+                    </div>
+                </div>
+            </RadzenCard>
+            <hr />
+             <RadzenButton Text="Quay lại" ButtonStyle="ButtonStyle.Warning" Class="m-6" Click="Cancel">
+            </RadzenButton>
+        
+        </div>
+            
+    </div>
+    
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+    SinhVien sinhVien = new SinhVien ();
+    Lop lop = new Lop ();
+       
+    protected override async Task OnParametersSetAsync()
+    {
+
+        sinhVien = await SinhVienService.GetSingleSV((int)Id);
+        lop =  await SinhVienService.GetSingleLop(sinhVien.MaLop);
+
+
+    }
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("/listsinhvien");
+    }
+
+    
+     
+}
+
+

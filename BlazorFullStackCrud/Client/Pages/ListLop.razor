@@ -1,0 +1,111 @@
+﻿@page "/listlop"
+@using Microsoft.AspNetCore.Authorization
+
+@inject ISinhVienService SinhVienService
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+<PageTitle>Lớp</PageTitle>
+
+<h3>Lớp</h3>
+<hr />
+ @if (SinhVienService.Nghanhs.Count == 0)
+    {
+    <p> Vui lòng thêm nghành để thêm được lớp mới !</p>
+    }
+    else
+    {
+          <RadzenButton Click=CreateLop Text="Thêm mới" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Secondary" Class="mb-4 mr-2"/>
+    }
+
+@*<table class="table">
+    <thead>
+        <tr>
+            <th>Mã Lớp</th>
+            <th>Tên lớp</th>
+            <th>Nghành</th>
+            <th>Số lượng sinh viên</th>
+            <th>Chức năng</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var lop in SinhVienService.Lops)
+        {
+            <tr>
+                <td>@lop.MaLop</td>
+                <td>@lop.TenLop</td>
+                @foreach (var nghanh in SinhVienService.Nghanhs)
+                {
+                    @if (lop.MaNghanh == nghanh.MaNghanh)
+                    {
+                         <td>@nghanh.TenNghanh</td>
+                         
+                    
+                         
+                    }
+                     
+                }
+                 <td>@lop.SinhViens.Count</td>
+            
+            
+                <td>
+                    <button class="btn btn-primary" @onclick="(() => ShowLop(lop.MaLop))"><i class="oi oi-pencil"></i></button>
+                </td>
+                <td>
+                    
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>*@
+
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="7" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+        Data="@lops" TItem="Lop" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn TItem="Lop" Property="MaLop" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+           
+            <RadzenDataGridColumn TItem="Lop" Property="TenLop" Title="Tên lớp" Frozen="true" Width="140px" />
+            <RadzenDataGridColumn TItem="Lop" Property="MaNghanh" Title="Mã nghành" Width="140px"/>
+           
+            
+               <RadzenDataGridColumn TItem="Lop" Filterable="false" Sortable="false" Title="Chức năng" TextAlign="TextAlign.Center" Width="140px">
+      
+                    
+                 
+               
+                <Template Context="data">
+                   
+                  
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@(args => ShowLop(data.MaLop))">
+                   </RadzenButton>
+                   
+                    
+                </Template>
+              
+            </RadzenDataGridColumn>
+        
+        </Columns>
+    </RadzenDataGrid>
+
+
+@code {
+    IEnumerable<Lop> lops;
+    protected override async Task OnInitializedAsync()
+    {
+
+        await SinhVienService.GetLops();
+        await SinhVienService.GetNghanhs();
+        lops = SinhVienService.Lops;
+
+    }
+
+    void ShowLop(int id)
+    {
+        NavigationManager.NavigateTo($"editlop/{id}");
+    }
+
+    void CreateLop()
+    {
+        NavigationManager.NavigateTo("/editlop");
+    }
+}

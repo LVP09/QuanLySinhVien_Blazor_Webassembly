@@ -1,0 +1,73 @@
+﻿
+@page "/register"
+@inject NavigationManager NavigationManager;
+@inject IRegisterService RegisterService
+
+
+<h3>Đăng ký</h3>
+
+@if (ShowErrors)
+{
+    <div class="alert alert-danger">
+        <p>@Error</p>
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Login</h5>
+        <EditForm Model="user" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <InputText id="username" class="form-control" @bind-Value="user.Email"></InputText>
+                <ValidationMessage For="()=> user.Email"></ValidationMessage>
+            </div>
+             <div class="form-group">
+                <label for="phonenumber">Số điện thoại</label>
+                <InputText id="phonenumber" class="form-control" @bind-Value="user.PhoneNumber"></InputText>
+                <ValidationMessage For="()=> user.PhoneNumber"></ValidationMessage>
+            </div>
+
+            <div class="form-group">
+                <label for="username">UserName</label>
+                <InputText id="username" class="form-control" @bind-Value="user.UserName"></InputText>
+                <ValidationMessage For="()=> user.UserName"></ValidationMessage>
+            </div>
+             <div class="form-group">
+                <label for="password">Password</label>
+                <InputText id="password" class="form-control" @bind-Value="user.PasswordHash"></InputText>
+                <ValidationMessage For="()=> user.PasswordHash"></ValidationMessage>
+            </div>
+            <button type="submit" class="btn btn-success">Đăng kí</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private bool ShowErrors;
+    private string Error = "Đăng kí thất bại";
+    User user = new User();
+    async Task HandleSubmit()
+    {
+        ShowErrors = false;
+
+        var result =  RegisterService.Register(user);
+        //if (result.)
+        //{
+
+        //    NavigationManager.NavigateTo("login");
+        //}
+        //else
+        //{
+        //    ShowErrors = true;
+           
+        //}
+           
+        
+        
+    
+    }
+}

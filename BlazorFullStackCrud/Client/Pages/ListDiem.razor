@@ -1,0 +1,116 @@
+﻿@page "/listdiem"
+@using Microsoft.AspNetCore.Authorization
+
+@inject IDiemService DiemService
+@inject ISinhVienService SinhVienService
+@inject IMonHocService MonHocService
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+<PageTitle>Điểm</PageTitle>
+
+<h3>Điểm</h3>
+<hr />
+@if (SinhVienService.SinhViens.Count == 0 || MonHocService.MonHocs.Count == 0 )
+{
+    <p>Vui lòng thêm sinh viên và môn học để nhập điểm  </p>
+}else{
+    
+
+             <RadzenButton Click=CreateDiem Text="Thêm mới" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Secondary"Class="mb-4 mr-2" />
+
+}
+
+
+@*<table class="table">
+    <thead>
+        <tr>
+            <th>Tên Sinh Viên</th>
+            <th>Môn học</th>
+            <th>Điểm môn học</th>
+            <th>Chức năng</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var diem in DiemService.Diems)
+        {
+            <tr>
+                @foreach (var sinhvien in SinhVienService.SinhViens)
+                {
+                    if (diem.SinhViensMaSv == sinhvien.MaSv)
+                    {
+                        
+
+                        foreach (var monhoc in MonHocService.MonHocs)
+                        {
+                            if (diem.MonHocMaMh == monhoc.MaMh)
+                            {
+                                <td>@sinhvien.TenSv</td> 
+                                 <td>@monhoc.TenMh</td> 
+                                 <td>@diem.DiemThi</td> 
+                                 
+                            }
+                        }
+                    }
+                }
+                                                           
+                <td>
+                    <button class="btn btn-primary" @onclick="(() => ShowDiem(diem.MaDiem))"><i class="oi oi-pencil"></i></button>
+                </td>
+               
+            </tr>
+        }
+    </tbody>
+</table>*@
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="7" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+        Data="@diems" TItem="Diem" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn TItem="Diem" Property="MaDiem" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+           
+            <RadzenDataGridColumn TItem="Diem" Property="MonHocMaMh" Title="Mã Môn học" Frozen="true" Width="140px" />
+            <RadzenDataGridColumn TItem="Diem" Property="SinhViensMaSv" Title="Mã sinh viên" Width="140px"/>
+            <RadzenDataGridColumn TItem="Diem" Property="DiemThi" Title="Điểm thi" Width="140px"/>
+            
+               <RadzenDataGridColumn TItem="Diem" Filterable="false" Sortable="false" Title="Chức năng" TextAlign="TextAlign.Center" Width="140px">
+      
+                    
+                 
+               
+                <Template Context="data">
+                   
+                  
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@(args => ShowDiem(data.MaDiem))">
+                   </RadzenButton>
+                   
+                    
+                </Template>
+              
+            </RadzenDataGridColumn>
+        
+        </Columns>
+    </RadzenDataGrid>
+
+
+@code {
+    IEnumerable<Diem> diems;
+    protected override async Task OnInitializedAsync()
+    {
+
+        await SinhVienService.GetListSV();
+        await MonHocService.GetMonHocs();
+        await DiemService.GetDiems();
+        diems = DiemService.Diems;
+
+        
+    }
+
+    void ShowDiem(int id)
+    {
+        NavigationManager.NavigateTo($"editdiem/{id}");
+    }
+
+    void CreateDiem()
+    {
+        NavigationManager.NavigateTo("/editdiem");
+    }
+}

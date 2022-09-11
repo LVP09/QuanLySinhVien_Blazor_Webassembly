@@ -1,0 +1,79 @@
+﻿@page "/editnghanh"
+@page "/editnghanh/{id:int}"
+@using Microsoft.AspNetCore.Authorization
+
+@inject ISinhVienService SinhVienService
+@attribute [Authorize]
+@if (Id == null)
+{
+    <PageTitle>Thêm mới nghành</PageTitle>
+    <h3>Thêm mới nghành</h3>
+}
+else
+{
+    <PageTitle>Sửa nghành</PageTitle>
+    <h3>Sửa nghành </h3>
+}
+
+<EditForm Model="nghanh" OnValidSubmit="HandleSubmit">
+       <DataAnnotationsValidator/>
+    <div>
+        <label for="tenNghanh"> Tên Nghành </label>
+        <InputText id="tenNghanh" @bind-Value="nghanh.TenNghanh" class="form-control"></InputText>
+         <ValidationMessage For="@(() => nghanh.TenNghanh)" />
+    </div>
+   
+   
+    
+    <br />
+    <button type="submit" class="btn btn-primary">@btnText</button>
+    <button type="button" class="btn btn-danger" @onclick="DeleteNghanh">Xóa Nghành</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    string btnText = string.Empty;
+
+    Nghanh nghanh = new Nghanh ();
+
+    protected override async Task OnInitializedAsync()
+    {
+        btnText = Id == null ? "Thêm mới " : "Sửa";
+
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id == null)
+        {
+        }
+        else
+        {
+            
+       
+            nghanh = await SinhVienService.GetSingleNghanh((int)Id);
+        }
+        
+    }
+
+    async Task HandleSubmit()
+    {
+        if (Id == null)
+        {
+            await SinhVienService.CreateNghanh(nghanh);
+        }
+        else
+        {
+            await SinhVienService.UpdateNghanh(nghanh);
+        }
+    }
+
+    async Task DeleteNghanh()
+   {
+        await SinhVienService.DeleteNghanh(nghanh.MaNghanh);
+    }
+
+}
+

@@ -1,0 +1,88 @@
+﻿@page "/listmonhoc"
+@using Microsoft.AspNetCore.Authorization
+@inject IMonHocService MonHocService
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+<PageTitle>Môn học</PageTitle>
+
+<h3>Môn học</h3>
+<hr />
+   <RadzenButton Click=CreateMonHoc Text="Thêm mới" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Secondary"Class="mb-4 mr-2" />
+@*<table class="table">
+    <thead>
+        <tr>
+            <th>Mã môn học</th>
+            <th>Tên môn học</th>
+            <th>Kì</th>
+            <th>Số tín chỉ</th>
+            <th>Chức năng</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var monhoc in MonHocService.MonHocs)
+        {
+            <tr>
+                <td>@monhoc.MaMh</td>
+                <td>@monhoc.TenMh</td>
+                 <td>@monhoc.Ki</td>
+                <td>@monhoc.SoTinChi</td>                           
+                           
+                <td>
+                    <button class="btn btn-primary" @onclick="(() => ShowMonHoc(monhoc.MaMh))"><i class="oi oi-pencil"></i></button>
+                </td>
+                <td>
+                    
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>*@
+
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="7" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+        Data="@monhocs" TItem="MonHoc" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn TItem="MonHoc" Property="MaMh" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+           
+            <RadzenDataGridColumn TItem="MonHoc" Property="TenMh" Title="Tên môn học" Frozen="true" Width="140px" />
+            <RadzenDataGridColumn TItem="MonHoc" Property="SoTinChi" Title="Số tín chỉ" Width="140px"/>
+           
+            
+               <RadzenDataGridColumn TItem="MonHoc" Filterable="false" Sortable="false" Title="Chức năng" TextAlign="TextAlign.Center" Width="140px">
+               
+                <Template Context="data">
+                   
+                  
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@(args => ShowMonHoc(data.MaMh))">
+                   </RadzenButton>
+                   
+                    
+                </Template>
+              
+            </RadzenDataGridColumn>
+        
+        </Columns>
+    </RadzenDataGrid>
+
+
+@code {
+    IEnumerable<MonHoc> monhocs;
+    protected override async Task OnInitializedAsync()
+    {
+
+        await MonHocService.GetMonHocs();
+        monhocs = MonHocService.MonHocs;
+
+        
+    }
+
+    void ShowMonHoc(int id)
+    {
+        NavigationManager.NavigateTo($"editmonhoc/{id}");
+    }
+
+    void CreateMonHoc()
+    {
+        NavigationManager.NavigateTo("/editmonhoc");
+    }
+}

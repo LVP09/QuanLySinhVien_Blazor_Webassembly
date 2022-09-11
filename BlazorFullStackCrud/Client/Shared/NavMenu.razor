@@ -1,0 +1,68 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Quản lý sinh viên</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+       <AuthorizeView>
+           <Authorized>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="listsinhvien">
+                <span class="oi oi-people" aria-hidden="true"></span> Sinh Viên
+            </NavLink>
+        </div>
+         <div class="nav-item px-3">
+            <NavLink class="nav-link" href="listlop">
+                <span class="oi oi-people" aria-hidden="true"></span> Lớp
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="listnghanh">
+                <span class="oi oi-people" aria-hidden="true"></span> Nghành
+            </NavLink>
+        </div>
+         <div class="nav-item px-3">
+            <NavLink class="nav-link" href="listmonhoc">
+                <span class="oi oi-people" aria-hidden="true"></span> Môn học
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="listdiem">
+                <span class="oi oi-people" aria-hidden="true"></span> Quản lý điểm
+            </NavLink>
+        </div>
+        </Authorized>
+
+      
+        <NotAuthorized>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="login">
+                <span class="oi oi-people" aria-hidden="true"></span> Đăng nhập
+            </NavLink>
+        </div>
+        </NotAuthorized>
+          </AuthorizeView>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

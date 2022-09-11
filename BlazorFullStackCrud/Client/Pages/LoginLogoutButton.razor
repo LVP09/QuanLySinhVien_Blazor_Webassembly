@@ -1,0 +1,36 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService AuthService;
+
+<AuthorizeView>
+    <Authorized>
+        <button @onclick="Logout" class="btn btn-danger">Đăng xuất</button>
+
+    </Authorized>
+    <NotAuthorized>
+        <button @onclick="Login" class="btn btn-primary">Đăng nhập</button>
+
+
+          <button @onclick="register" class="btn btn-primary">Đăng kí</button>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    void Login()
+    {
+        NavigationManager.NavigateTo("login");
+    }
+    void register()
+    {
+         NavigationManager.NavigateTo("register");
+    }
+    async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("authToken");
+        await AuthStateProvider.GetAuthenticationStateAsync();
+       await AuthService.Logout();
+    }
+
+}

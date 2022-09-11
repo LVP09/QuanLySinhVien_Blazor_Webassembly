@@ -1,0 +1,125 @@
+﻿@page "/editsinhvien"
+@page "/editsinhvien/{id:int}"
+@using Microsoft.AspNetCore.Authorization
+
+@inject ISinhVienService SinhVienService
+@attribute [Authorize]
+
+@if (Id == null)
+{
+    <PageTitle>Thêm mới sinh viên</PageTitle>
+    <h3>Thêm mới sinh viên</h3>
+}
+else
+{
+    <PageTitle>Sửa sinh viên</PageTitle>
+    <h3>Sửa sinh viên</h3>
+}
+
+<EditForm Model="sinhVien" OnValidSubmit="HandleSubmit">
+      <DataAnnotationsValidator />
+    <div>
+        
+        <img src="@sinhVien.AnhSv" class="rounded" style="max-height: 200px;"/>
+    </div>
+     <div>
+        <label for="image"> Ảnh sinh viên  </label>
+        <InputFile OnChange="OnFileChange" class="form-control"></InputFile>
+        <ValidationMessage For="@(() => sinhVien.AnhSv)" />
+    </div>
+     <div>
+        <label for="tensv"> Tên </label>
+        <InputText id="tensv" @bind-Value="sinhVien.TenSv" class="form-control"></InputText>
+         <ValidationMessage For="@(() => sinhVien.TenSv)" />
+    </div>
+    <div>
+        <label for="email"> Email </label>
+        <InputText id="email" @bind-Value="sinhVien.Email" class="form-control"></InputText>
+        <ValidationMessage For="@(() => sinhVien.Email)" />
+    </div>
+     <div>
+        <label for="diachi"> Địa chỉ </label>
+        <InputText id="diachi" @bind-Value="sinhVien.DiaChi" class="form-control"></InputText>
+        <ValidationMessage For="@(() => sinhVien.DiaChi)" />
+    </div>
+     <div>
+        <label for="ngaysinh"> Ngày sinh </label>
+        <InputDate id="ngaysinh" @bind-Value="sinhVien.NgaySinh" class="form-control"></InputDate>
+        <ValidationMessage For="@(() => sinhVien.NgaySinh)" />
+    </div>
+       <div>
+        <label for="sdt"> Số điện thoại </label>
+        <InputText id="sdt" @bind-Value="sinhVien.SDT" class="form-control"></InputText>
+         <ValidationMessage For="@(() => sinhVien.SDT)" />
+       
+    </div>
+
+    <div>
+        <label>Lớp</label><br />
+        <InputSelect @bind-Value="sinhVien.MaLop" class="form-select">
+            @foreach (var comic in SinhVienService.Lops)
+            {
+                <option value="@comic.MaLop">@comic.TenLop</option>
+            }
+        </InputSelect>
+         <ValidationMessage For="@(() => sinhVien.MaLop)" />
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">@btnText</button>
+    <button type="button" class="btn btn-danger" @onclick="DeleteHero">Delete Hero</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    string btnText = string.Empty;
+
+    SinhVien sinhVien = new SinhVien { MaLopNavigation = new Lop() };
+
+    protected override async Task OnInitializedAsync()
+    {
+        btnText = Id == null ? "Save New Hero" : "Update Hero";
+        await SinhVienService.GetLops();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id == null)
+        {
+            sinhVien.MaLopNavigation = SinhVienService.Lops[0];
+            sinhVien.MaLop = sinhVien.MaLopNavigation.MaLop;
+        }
+        else
+        {
+            sinhVien = await SinhVienService.GetSingleSV((int)Id);
+        }
+    }
+
+    async Task HandleSubmit()
+    {
+        if (Id == null)
+        {
+            await SinhVienService.CreateSinhVien(sinhVien);
+        }
+        else
+        {
+            await SinhVienService.UpdateSinhVien(sinhVien);
+        }
+    }
+
+    async Task DeleteHero()
+    {
+        await SinhVienService.DeleteSinhVien(sinhVien.MaSv);
+    }
+     async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+        var format = "image/png";
+        var resizedImage = await e.File.RequestImageFileAsync(format, 200, 200);
+        var buffer = new byte[resizedImage.Size];
+        await resizedImage.OpenReadStream().ReadAsync(buffer);
+        var imageData = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+        sinhVien.AnhSv = imageData;
+    }
+}
+

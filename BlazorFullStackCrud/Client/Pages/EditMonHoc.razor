@@ -1,0 +1,91 @@
+﻿@page "/editmonhoc"
+@page "/editmonhoc/{id:int}"
+@using Microsoft.AspNetCore.Authorization
+@inject IMonHocService MonHocService
+@attribute [Authorize]
+
+@if (Id == null)
+{
+    <PageTitle>Thêm mới môn học</PageTitle>
+    <h3>Thêm mới môn học</h3>
+}
+else
+{
+    <PageTitle>Sửa môn học</PageTitle>
+    <h3>Sửa môn học </h3>
+}
+
+<EditForm Model="monHoc" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator/>
+    <div>
+        <label for="tenmh"> Tên môn học </label>
+        <InputText id="tenmh" @bind-Value="monHoc.TenMh" class="form-control"></InputText>
+            <ValidationMessage For="@(() => monHoc.TenMh)" />
+    </div>
+    <div>
+        <label for="ki"> Kì </label>
+        <InputText id="ki" @bind-Value="monHoc.Ki" class="form-control"></InputText>
+            <ValidationMessage For="@(() => monHoc.Ki)" />
+    </div>
+    <div>
+        <label for="sotinchi"> Số tín chỉ </label>
+        <InputNumber id="sotinchi" @bind-Value="monHoc.SoTinChi" class="form-control"></InputNumber>
+            <ValidationMessage For="@(() => monHoc.SoTinChi)" />
+    </div>
+
+   
+   
+    
+    <br />
+    <button type="submit" class="btn btn-primary">@btnText</button>
+    <button type="button" class="btn btn-danger" @onclick="DeleteMonHoc">Xóa MonHoc</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    string btnText = string.Empty;
+
+    MonHoc monHoc = new MonHoc ();
+
+    protected override async Task OnInitializedAsync()
+    {
+        btnText = Id == null ? "Thêm mới " : "Sửa";
+
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id == null)
+        {
+            
+        }
+        else
+        {
+            
+       
+            monHoc = await MonHocService.GetSingleMh((int)Id);
+        }
+        
+    }
+
+    async Task HandleSubmit()
+    {
+        if (Id == null)
+        {
+            await MonHocService.CreateMh(monHoc);
+        }
+        else
+        {
+            await MonHocService.UpdateMh(monHoc);
+        }
+    }
+
+    async Task DeleteMonHoc()
+   {
+        await MonHocService.DeleteMh(monHoc.MaMh);
+    }
+
+}
+

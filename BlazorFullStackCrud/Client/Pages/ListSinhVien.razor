@@ -1,0 +1,167 @@
+﻿@page "/listsinhvien"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@attribute [Authorize]
+
+@inject ISinhVienService SinhVienService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Sinh Viên</PageTitle>
+
+<h3>Sinh Viên</h3>
+<hr />
+
+
+  
+    @if (SinhVienService.Lops.Count == 0)
+    {
+    <p> Vui lòng thêm lớp để thêm được sinh viên mới !</p>
+    }
+    else
+    {
+          <RadzenButton Text="Reset" Click="@Reset" Style="margin-bottom: 20px;" />
+         <RadzenButton Click=CreateSV Text="Thêm mới" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Secondary" />
+       
+              <RadzenButton Text="Export XLS" Icon="grid_on" Click="@(args => Export("excel"))" Class="mb-4 mr-2" />
+               
+    }
+ 
+
+
+
+
+
+<table class="table">
+        <thead>
+            <tr>
+               
+                <th>Mã sinh viên</th>
+                <th>Tên sinh viên</th>
+                <th>Lớp</th>
+                <th>Nghành</th>
+                <th>Chức năng</th>
+            </tr>
+        </thead>
+        <tbody>
+        
+            @foreach (var sv in SinhVienService.SinhViens)
+            {
+                <tr>
+                     
+                    <td>@sv.MaSv</td>
+                    <td>@sv.TenSv</td>
+                    @foreach (var lops in SinhVienService.Lops)
+                    {
+                        @if (sv.MaLop == lops.MaLop)
+                        {
+                             <td>@lops.TenLop</td>
+                             @foreach (var nghanhs in SinhVienService.Nghanhs)
+                            {
+                                  if (lops.MaNghanh == nghanhs.MaNghanh)
+                            {
+                                <td>@nghanhs.TenNghanh</td>
+                            }
+                    
+                             }
+                        }
+                     
+                    }
+               
+          
+            
+                    <td>
+                        <button class="btn btn-primary" @onclick="(() => ShowSV(sv.MaSv))"><i class="oi oi-pencil"></i></button>
+                    </td>
+                    <td>
+                    
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>   
+
+     <RadzenDataGrid  @ref="grid" AllowFiltering="true" AllowColumnResize="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="7" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+        Data="@sinhViens" TItem="SinhVien" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn TItem="SinhVien" Property="MaSv" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+            <RadzenDataGridColumn TItem="SinhVien" Title="AnhSv" Frozen="true" Sortable="false" Filterable="false" Width="60px" >
+                <Template Context="data">
+                    <RadzenImage Path="@data.AnhSv" style="width: 40px; height: 40px; border-radius: 8px;" />
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="SinhVien" Property="TenSv" Title="Tên sinh viên" Frozen="true" Width="140px" />
+            <RadzenDataGridColumn TItem="SinhVien" Property="MaLop" Title="Mã Lớp" Width="140px"/>
+            <RadzenDataGridColumn TItem="SinhVien" Property="Email" Title="Email" Width="140px"/>
+             <RadzenDataGridColumn TItem="SinhVien" Property="NgaySinh" Title="Ngày sinh" FormatString="{0:d}" Width="140px"/>
+             <RadzenDataGridColumn TItem="SinhVien" Property="SDT" Title="Số điện thoại" Width="140px"/>
+               <RadzenDataGridColumn TItem="SinhVien" Filterable="false" Sortable="false" Title="Chức năng" TextAlign="TextAlign.Center" Width="140px">
+      
+                    
+                 
+               
+                <Template Context="data">
+                    <RadzenButton Icon="privacy_tip" ButtonStyle="ButtonStyle.Info" Class="m-1" Click="@(args => DetailSV(data.MaSv))">
+                   </RadzenButton>
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@(args => ShowSV(data.MaSv))">
+                   </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Small" Class="m-1" Click="@(args => DeleteSV(data.MaSv))">
+                    </RadzenButton>
+                    
+                </Template>
+              
+            </RadzenDataGridColumn>
+        
+        </Columns>
+    </RadzenDataGrid>
+  
+
+     
+@code {
+    RadzenDataGrid<SinhVien> grid;
+    IEnumerable<SinhVien> sinhViens;
+    protected override async Task OnInitializedAsync()
+    {
+        await SinhVienService.GetListSV();
+         await SinhVienService.GetLops();
+        sinhViens = SinhVienService.SinhViens;
+       
+    }
+     async Task Reset()
+    {
+        grid.Reset(true); 
+        await grid.FirstPage(true);
+    }
+     void DeleteSV(int id)
+    {
+         SinhVienService.DeleteSinhVien(id);
+         
+    }
+     void DetailSV(int id)
+    {
+        NavigationManager.NavigateTo($"detailsinhvien/{id}");
+    }
+   
+    void ShowSV(int id)
+    {
+        NavigationManager.NavigateTo($"editsinhvien/{id}");
+    }
+
+    void CreateSV()
+    {
+        NavigationManager.NavigateTo("/editsinhvien");
+    }
+    void InportExcelx()
+    {
+        NavigationManager.NavigateTo("/Excel");
+    }
+    public void Export(string type)
+    {
+        SinhVienService.Export("sinhViens", type, new Query() 
+            { 
+                OrderBy = grid.Query.OrderBy, 
+                Filter = grid.Query.Filter, 
+                Select = string.Join(",", grid.ColumnsCollection.Where(c => c.GetVisible()).Select(c => c.Property)) 
+            });
+            
+    }
+}

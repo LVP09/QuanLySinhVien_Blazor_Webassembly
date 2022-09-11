@@ -1,0 +1,87 @@
+﻿@page "/editlop"
+@page "/editlop/{id:int}"
+@using Microsoft.AspNetCore.Authorization
+
+@inject ISinhVienService SinhVienService
+@attribute [Authorize]
+@if (Id == null)
+{
+    <PageTitle>Thêm mới lớp</PageTitle>
+    <h3>Thêm mới lớp</h3>
+}
+else
+{
+    <PageTitle>Sửa lớp</PageTitle>
+    <h3>Sửa lớp </h3>
+}
+
+<EditForm Model="lop" OnValidSubmit="HandleSubmit">
+     <DataAnnotationsValidator />
+    <div>
+        <label for="tenlop"> Tên Lớp </label>
+        <InputText id="tenlop" @bind-Value="lop.TenLop" class="form-control"></InputText>
+           <ValidationMessage For="@(() => lop.TenLop)" />
+    </div>
+   
+   
+    <div>
+        <label>Nghành</label><br />
+        <InputSelect @bind-Value="lop.MaNghanh" class="form-select">
+            @foreach (var comic in SinhVienService.Nghanhs)
+            {
+                <option value="@comic.MaNghanh">@comic.TenNghanh</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => lop.MaNghanh)" />
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">@btnText</button>
+    <button type="button" class="btn btn-danger" @onclick="DeleteLop">Xóa Lớp</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    string btnText = string.Empty;
+
+    Lop lop = new Lop { MaNghanhNavigation = new Nghanh() };
+
+    protected override async Task OnInitializedAsync()
+    {
+        btnText = Id == null ? "Thêm mới lớp" : "Sửa lớp";
+        await SinhVienService.GetNghanhs();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id == null)
+        {
+            lop.MaNghanhNavigation = SinhVienService.Nghanhs[0];
+            lop.MaNghanh = lop.MaNghanhNavigation.MaNghanh;
+        }
+        else
+        {
+            lop = await SinhVienService.GetSingleLop((int)Id);
+        }
+    }
+
+    async Task HandleSubmit()
+    {
+        if (Id == null)
+        {
+            await SinhVienService.CreateLop(lop);
+        }
+        else
+        {
+            await SinhVienService.UpdateLop(lop);
+        }
+    }
+
+    async Task DeleteLop()
+   {
+        await SinhVienService.DeleteLop(lop.MaLop);
+    }
+}
+
+

@@ -1,0 +1,98 @@
+﻿@page "/editdiem"
+@page "/editdiem/{id:int}"
+@using Microsoft.AspNetCore.Authorization
+
+
+@inject ISinhVienService SinhVienService
+@inject IDiemService DiemService
+@inject IMonHocService MonHocService
+@attribute [Authorize]
+
+
+
+
+
+@if (Id == null)
+{
+    <PageTitle>Thêm mới điểm</PageTitle>
+    <h3>Thêm mới điểm</h3>
+}
+<EditForm Model="diem" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <div>
+        <label for="diemthi"> Điểm môn học </label>
+        <InputText id="diemthi" @bind-Value="diem.DiemThi" class="form-control"></InputText>
+         <ValidationMessage For="@(() => diem.DiemThi)" />
+    </div>
+   <div>
+        <label>Môn học</label><br />
+        <InputSelect @bind-Value="diem.MonHocMaMh" class="form-select">
+            @foreach (var x in MonHocService.MonHocs)
+            {
+                <option value="@x.MaMh">@x.TenMh</option>
+            }
+        </InputSelect>
+         <ValidationMessage For="@(() => diem.MonHocMaMh)" />
+    </div>
+   
+    <div>
+        <label>Sinh Viên</label><br />
+        <InputSelect @bind-Value="diem.SinhViensMaSv" class="form-select">
+            @foreach (var x in SinhVienService.SinhViens)
+            {
+                <option value="@x.MaSv">@x.TenSv</option>
+            }
+        </InputSelect>
+         <ValidationMessage For="@(() => diem.SinhViensMaSv)" />
+    </div>
+
+    <br />
+    <button type="submit" class="btn btn-primary">@btnText</button>
+    <button type="button" class="btn btn-danger" @onclick="DeleteDiem">Xóa Điểm</button>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    string btnText = string.Empty;
+    Diem diem = new Diem {SinhViensMaSvNavigation = new SinhVien(), MonHocMaMhNavigation = new MonHoc()};
+
+    protected override async Task OnInitializedAsync()
+    {
+        btnText = Id == null ? "Thêm mới" : "Sửa ";
+        await SinhVienService.GetListSV();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id == null)
+        {
+            diem.SinhViensMaSvNavigation = SinhVienService.SinhViens[0];
+            diem.SinhViensMaSv = diem.SinhViensMaSvNavigation.MaSv;
+            diem.MonHocMaMhNavigation = MonHocService.MonHocs[0];
+            diem.MonHocMaMh = diem.MonHocMaMhNavigation.MaMh;
+        }
+        else
+        {
+            diem = await DiemService.GetSingleDiem((int)Id);
+        }
+    }
+    async Task HandleSubmit()
+    {
+        if (Id == null)
+        {
+            await DiemService.CreateDiem(diem);
+        }
+        else
+        {
+            await DiemService.UpdateDiem(diem);
+        }
+    }
+
+    async Task DeleteDiem()
+   {
+        await DiemService.DeleteDiem(diem.MaDiem);
+    }
+}

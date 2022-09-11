@@ -1,0 +1,85 @@
+﻿@page "/listnghanh"
+@using Microsoft.AspNetCore.Authorization
+@inject ISinhVienService SinhVienService
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+<PageTitle>Nghành</PageTitle>
+
+<h3>Nghành</h3>
+<hr />
+   <RadzenButton Click=CreateNghanh Text="Thêm mới" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Secondary" Class="mb-4 mr-2"/>
+@*<table class="table">
+    <thead>
+        <tr>
+            <th>Mã nghành</th>
+            <th>Tên nghành</th>
+            <th>Số lượng lớp</th>
+            <th>Chức năng</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var nghanh in SinhVienService.Nghanhs)
+        {
+            <tr>
+                <td>@nghanh.MaNghanh</td>
+                <td>@nghanh.TenNghanh</td>               
+                           
+                <td>
+                    <button class="btn btn-primary" @onclick="(() => ShowNghanh(nghanh.MaNghanh))"><i class="oi oi-pencil"></i></button>
+                </td>
+                <td>
+                    
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>*@
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="7" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+        Data="@nghanhs" TItem="Nghanh" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn TItem="Nghanh" Property="MaNghanh" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+           
+            <RadzenDataGridColumn TItem="Nghanh" Property="TenNghanh" Title="Tên môn học" Frozen="true" Width="140px" />
+           
+           
+            
+               <RadzenDataGridColumn TItem="Nghanh" Filterable="false" Sortable="false" Title="Chức năng" TextAlign="TextAlign.Center" Width="140px">
+               
+                <Template Context="data">
+                   
+                  
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@(args => ShowNghanh(data.MaNghanh))">
+                   </RadzenButton>
+                   
+                    
+                </Template>
+              
+            </RadzenDataGridColumn>
+        
+        </Columns>
+    </RadzenDataGrid>
+
+
+@code {
+    IEnumerable<Nghanh> nghanhs;
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        await SinhVienService.GetNghanhs();
+        nghanhs = SinhVienService.Nghanhs;
+
+        
+    }
+
+    void ShowNghanh(int id)
+    {
+        NavigationManager.NavigateTo($"editnghanh/{id}");
+    }
+
+    void CreateNghanh()
+    {
+        NavigationManager.NavigateTo("/editnghanh");
+    }
+}
